@@ -25,5 +25,3 @@
 - src: git+https://github.com/ansible-collections/community.general.git
   version: 6.5.0 # branch name
   name: community.general
-
-  

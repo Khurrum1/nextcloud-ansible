@@ -1,0 +1,40 @@
+
+# Operating systems supported by this playbook:
+# - Ubuntu 20.04 LTS (Focal)
+# - Ubuntu 18.04 LTS (Bionic)
+
+---
+
+- hosts: all
+  become: yes
+  vars:
+    ssh_allow_users: "ubuntu"
+    ssh_allow_groups: "ubuntu"
+    ssh_use_pam: True
+
+
+    - name: Ubuntu/Debian | Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Ubuntu/Debian | Upgrade apt packages
+      apt:
+        upgrade: dist # ensures apt-get is used instead of aptitude
+        state: latest
+
+    - name: Ubuntu | Install additional packages
+      apt:
+        name: "{{ installed_packages }}"
+        state: latest
+      vars:
+        installed_packages:
+          - python3-netaddr
+          - acl
+
+  roles:
+    - nextcloud.admin #pulled from requirements.yml
+    - geerlingguy.php-versions #pulled from requirements.yml
+    - community.general #pulled from requirements.yml
+  
+  collections:
+    - ansible.utils #pulled from requirements.yml

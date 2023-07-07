@@ -1,0 +1,164 @@
+---
+- name: Install NextCloud on box
+  hosts: dnsserver
+  become: true
+  roles:
+    - role: nextcloud.admin.install_nextcloud
+
+  tasks:
+    - name: Update apt cache (for Debian/Ubuntu-based systems)
+      apt:
+        update_cache: yes
+      when: ansible_os_family == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Install required packages
+      apt:
+        name:
+          - apache2
+          - libapache2-mod-php
+          - php
+          - php-common
+          - php-gd
+          - php-mysql
+          - php-curl
+          - php-xml
+          - php-mbstring
+          - php-intl
+          - php-zip
+          - php-imagick
+        state: present
+      when: ansible_os_family == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Install required packages (for Red Hat/CentOS-based systems)
+      yum:
+        name:
+          - httpd
+          - php
+          - php-gd
+          - php-mysqlnd
+          - php-opcache
+          - php-xml
+          - php-mbstring
+          - php-intl
+          - php-json
+          - php-mcrypt
+          - php-zip
+          - php-process
+          - php-imagick
+        state: present
+      when: ansible_os_family == 'RedHat' or ansible_distribution == 'CentOS'
+
+    - name: Start and enable Apache service
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+      when: ansible_os_family == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Start and enable Apache service (for Red Hat/CentOS-based systems)
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+      when: ansible_os_family == 'RedHat' or ansible_distribution == 'CentOS'
+
+#----
+---
+- name: Install Nextcloud
+  hosts: your_server
+  become: yes
+
+  tasks:
+    - name: Update apt cache (for Debian/Ubuntu-based systems)
+      apt:
+        update_cache: yes
+      when: ansible_os_family == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Install required packages
+      apt:
+        name:
+          - apache2
+          - libapache2-mod-php
+          - php
+          - php-common
+          - php-gd
+          - php-mysql
+          - php-curl
+          - php-xml
+          - php-mbstring
+          - php-intl
+          - php-zip
+          - php-imagick
+        state: present
+      when: ansible_os_family == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Install required packages (for Red Hat/CentOS-based systems)
+      yum:
+        name:
+          - httpd
+          - php
+          - php-gd
+          - php-mysqlnd
+          - php-opcache
+          - php-xml
+          - php-mbstring
+          - php-intl
+          - php-json
+          - php-mcrypt
+          - php-zip
+          - php-process
+          - php-imagick
+        state: present
+      when: ansible_os_family == 'RedHat' or ansible_distribution == 'CentOS'
+
+    - name: Start and enable Apache service
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+      when: ansible_os_family == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Start and enable Apache service (for Red Hat/CentOS-based systems)
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+      when: ansible_os_family == 'RedHat' or ansible_distribution == 'CentOS'
+
+    - name: Download Nextcloud
+      get_url:
+        url: "https://download.nextcloud.com/server/releases/nextcloud-23.0.0.zip"
+        dest: /tmp/nextcloud.zip
+
+    - name: Extract Nextcloud
+      unarchive:
+        src: /tmp/nextcloud.zip
+        dest: /var/www/html
+        remote_src: yes
+        owner: www-data
+        group: www-data
+        mode: 0755
+
+    - name: Set the correct permissions
+      file:
+        path: /var/www/html/nextcloud
+        state: directory
+        owner: www-data
+        group: www-data
+        recurse: yes
+
+    - name: Set up Apache virtualhost
+      template:
+        src: nextcloud.conf.j2
+        dest: /etc/apache2/sites-available/nextcloud.conf
+        owner: root
+        group: root
+      when: ansible_os_family == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Set up Apache virtualhost (for Red Hat/CentOS-based systems)
+      template:
+        src: nextcloud.conf.j2
+        dest: /etc/httpd/conf.d/nextcloud.conf
+        owner: root
+        group: root
+      when
